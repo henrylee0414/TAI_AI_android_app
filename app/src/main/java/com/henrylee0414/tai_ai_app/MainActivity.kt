@@ -18,26 +18,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.henrylee0414.tai_ai_app.domain.RepairRules
 
+//for RepairViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.henrylee0414.tai_ai_app.data.model.RepairItem
+import com.henrylee0414.tai_ai_app.ui.repair.RepairViewModel
+
+//for MockRepairData
 import com.henrylee0414.tai_ai_app.data.mock.MockRepairData
 import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val repairViewModel = ViewModelProvider(this)[RepairViewModel::class.java]
         enableEdgeToEdge()
         setContent {
             TAI_AI_APPTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "henrylee0414",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        items = repairViewModel.items,
+                        onApprove = { itemId ->
+                            repairViewModel.approve(itemId)
+                        },
+                        onDefer = { itemId ->
+                            repairViewModel.defer(itemId)
+                        },
+                        onReset = {
+                            repairViewModel.reset()
+                        }
                     )
                 }
             }
@@ -46,10 +59,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    var items by remember {
-        mutableStateOf(MockRepairData.initialItems) //使compose能觀察變化、更新畫面
-    }
+fun Greeting(
+    name: String,
+    modifier: Modifier = Modifier,
+    items: List<RepairItem> = MockRepairData.initialItems,
+    onApprove: (String) -> Unit = {},
+    onDefer: (String) -> Unit = {},
+    onReset: () -> Unit = {}
+) {
 
     val approvedCount = items.count {
         it.approvalStatus == ApprovalStatus.APPROVED
@@ -76,7 +93,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
-                items = MockRepairData.initialItems
+                onReset()
             }
         ) {
             Text("重設測試情境")
@@ -97,13 +114,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             if (RepairRules.canDecide(item)) {
                 Button(
                     onClick = {
-                        items = items.map { current ->
-                            if (current.id == item.id) {
-                                RepairRules.approve(current)
-                            } else {
-                                current
-                            }
-                        }
+                        onApprove(item.id)
                     }
                 ) {
                     Text("同意：${item.name}")
@@ -111,13 +122,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                 Button(
                     onClick = {
-                        items = items.map { current ->
-                            if (current.id == item.id) {
-                                RepairRules.defer(current)
-                            } else {
-                                current
-                            }
-                        }
+                        onDefer(item.id)
                     }
                 ) {
                     Text("暫緩：${item.name}")
