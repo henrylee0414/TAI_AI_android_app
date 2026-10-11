@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             TAI_AI_APPTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "henrylee0414",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
