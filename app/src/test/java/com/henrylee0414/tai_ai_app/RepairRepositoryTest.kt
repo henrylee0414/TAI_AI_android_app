@@ -1,6 +1,8 @@
 package com.henrylee0414.tai_ai_app
 
 import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
+import com.henrylee0414.tai_ai_app.data.model.RepairStatus
+import com.henrylee0414.tai_ai_app.data.model.ServiceStage
 import com.henrylee0414.tai_ai_app.data.repository.InMemoryRepairRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
@@ -82,5 +84,49 @@ class RepairRepositoryTest {
 
         assertEquals(initialItems, resetItems)
         assertEquals(initialItems, repository.getItems())
+    }
+
+    @Test
+    fun completedRepairs_saveOrderAndEnterFinalCheck() {
+        val repository = InMemoryRepairRepository()
+
+        // 煞車片原本已在施工，直接標記完成。
+        repository.completeRepair("repair_001")
+
+        // 電瓶需要先取得同意，才能開始並完成施工。
+        repository.approve("repair_002")
+        repository.startRepair("repair_002")
+
+        assertEquals(
+            RepairStatus.IN_PROGRESS,
+            repository.getItems().first { it.id == "repair_002" }.status
+        )
+
+        repository.completeRepair("repair_002")
+
+        // 確認兩個項目的完工狀態已存入 Repository。
+        val items = repository.getItems()
+        assertEquals(2, items.size)
+        items.forEach { item ->
+            assertEquals(RepairStatus.COMPLETED, item.status)
+        }
+
+        val result = repository.startFinalCheck()
+
+        assertEquals(ServiceStage.FINAL_CHECK, result.serviceStage)
+        assertEquals(result, repository.getOrder())
+    }
+
+    @Test
+    fun unfinishedOrder_cannotEnterFinalCheckAndKeepsOriginalData() {
+        val repository = InMemoryRepairRepository()
+        val originalOrder = repository.getOrder()
+
+        try {
+            repository.startFinalCheck()
+            fail("尚未完成施工，不應允許進入完工確認")
+        } catch (error: IllegalArgumentException) {
+            assertEquals(originalOrder, repository.getOrder())
+        }
     }
 }

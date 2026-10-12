@@ -32,6 +32,10 @@ import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
 
 import com.henrylee0414.tai_ai_app.data.model.RepairOrder
 
+import com.henrylee0414.tai_ai_app.data.model.RepairStatus
+import com.henrylee0414.tai_ai_app.domain.RepairOrderRules
+import com.henrylee0414.tai_ai_app.data.model.ServiceStage
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,15 +50,14 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         items = repairViewModel.items,
                         errorMessage = repairViewModel.errorMessage,
-                        onApprove = { itemId ->
-                            repairViewModel.approve(itemId)
-                        },
-                        onDefer = { itemId ->
-                            repairViewModel.defer(itemId)
-                        },
-                        onReset = {
-                            repairViewModel.reset()
-                        }
+                        onApprove = { itemId -> repairViewModel.approve(itemId) },
+                        onDefer = { itemId -> repairViewModel.defer(itemId) },
+                        onReset = { repairViewModel.reset() },
+                        onStartRepair = { repairViewModel.startRepair(it) },
+                        onCompleteRepair = { repairViewModel.completeRepair(it) },
+                        onStartFinalCheck = { repairViewModel.startFinalCheck() },
+                        onMarkReadyForPickup = { repairViewModel.markReadyForPickup() },
+                        onMarkDelivered = { repairViewModel.markDelivered() }
                     )
                 }
             }
@@ -71,7 +74,12 @@ fun Greeting(
     errorMessage: String? = null,
     onApprove: (String) -> Unit = {},
     onDefer: (String) -> Unit = {},
-    onReset: () -> Unit = {}
+    onReset: () -> Unit = {},
+    onStartRepair: (String) -> Unit = {},
+    onCompleteRepair: (String) -> Unit = {},
+    onStartFinalCheck: () -> Unit = {},
+    onMarkReadyForPickup: () -> Unit = {},
+    onMarkDelivered: () -> Unit = {}
 ) {
 
     val approvedCount = items.count {
@@ -142,6 +150,38 @@ fun Greeting(
                 暫緩項目已提供報價合計：$deferredAmount 元
             """.trimIndent()
         )
+        Text("開發用模擬控制：維修單")
+
+        Button(
+            onClick = onStartFinalCheck,
+            enabled = RepairOrderRules.canStartFinalCheck(order)
+        ) {
+            Text("模擬進入完工確認")
+        }
+
+        when (order.serviceStage) {
+            ServiceStage.FINAL_CHECK -> {
+                Button(
+                    onClick = onMarkReadyForPickup
+                ) {
+                    Text("模擬最終檢查通過，可取車")
+                }
+            }
+
+            ServiceStage.READY_FOR_PICKUP -> {
+                Button(
+                    onClick = onMarkDelivered
+                ) {
+                    Text("模擬顧客取車，已交車")
+                }
+            }
+
+            ServiceStage.DELIVERED -> {
+                Text("此維修單已交車")
+            }
+
+            else -> Unit
+        }
 
         if (missingQuoteCount > 0) {
             Text(
@@ -198,6 +238,32 @@ fun Greeting(
                     }
                 ) {
                     Text("暫緩：${item.name}")
+                }
+            }
+
+            if (item.approvalStatus == ApprovalStatus.APPROVED) {
+                Text("開發用模擬控制")
+
+                when (item.status) {
+                    RepairStatus.PENDING -> {
+                        Button(
+                            onClick = { onStartRepair(item.id) }
+                        ) {
+                            Text("模擬開始施工")
+                        }
+                    }
+
+                    RepairStatus.IN_PROGRESS -> {
+                        Button(
+                            onClick = { onCompleteRepair(item.id) }
+                        ) {
+                            Text("模擬施工完成")
+                        }
+                    }
+
+                    RepairStatus.COMPLETED -> {
+                        Text("此項目已施工完成")
+                    }
                 }
             }
         }
