@@ -30,6 +30,8 @@ import com.henrylee0414.tai_ai_app.ui.repair.RepairViewModel
 import com.henrylee0414.tai_ai_app.data.mock.MockRepairData
 import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
 
+import com.henrylee0414.tai_ai_app.data.model.RepairOrder
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +42,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "henrylee0414",
+                        order = repairViewModel.order,
                         modifier = Modifier.padding(innerPadding),
                         items = repairViewModel.items,
                         errorMessage = repairViewModel.errorMessage,
@@ -62,6 +65,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(
     name: String,
+    order: RepairOrder = MockRepairData.initialOrder,
     modifier: Modifier = Modifier,
     items: List<RepairItem> = MockRepairData.initialItems,
     errorMessage: String? = null,
@@ -114,6 +118,13 @@ fun Greeting(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Hello $name!")
+        Text(
+            text = """
+                維修單：${order.id}
+                車輛：${order.vehicleDisplayName}
+                服務階段：${order.serviceStage}
+            """.trimIndent()
+        )
         Text("【開發測試：追加維修互動】")
         if (errorMessage != null) {
             Text(text = "操作未完成：$errorMessage")

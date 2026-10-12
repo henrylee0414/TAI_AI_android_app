@@ -4,6 +4,8 @@ import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
 import com.henrylee0414.tai_ai_app.data.model.RepairItem
 import com.henrylee0414.tai_ai_app.data.model.RepairStatus
 import com.henrylee0414.tai_ai_app.data.model.RepairQuote
+import com.henrylee0414.tai_ai_app.data.model.RepairOrder
+import com.henrylee0414.tai_ai_app.data.model.ServiceStage
 
 object MockRepairData {
 
@@ -33,5 +35,12 @@ object MockRepairData {
                 laborAmountTWD = 300
             )
         )
+    )
+
+    val initialOrder = RepairOrder(
+        id = "demo_order_001",
+        vehicleDisplayName = "展示車輛",
+        serviceStage = ServiceStage.INSPECTION_AND_MAINTENANCE,
+        items = initialItems //把已建立的資料，放進維修單的items欄位
     )
 }
