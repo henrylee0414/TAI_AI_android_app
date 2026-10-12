@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                         name = "henrylee0414",
                         modifier = Modifier.padding(innerPadding),
                         items = repairViewModel.items,
+                        errorMessage = repairViewModel.errorMessage,
                         onApprove = { itemId ->
                             repairViewModel.approve(itemId)
                         },
@@ -63,6 +64,7 @@ fun Greeting(
     name: String,
     modifier: Modifier = Modifier,
     items: List<RepairItem> = MockRepairData.initialItems,
+    errorMessage: String? = null,
     onApprove: (String) -> Unit = {},
     onDefer: (String) -> Unit = {},
     onReset: () -> Unit = {}
@@ -85,6 +87,9 @@ fun Greeting(
     ) {
         Text("Hello $name!")
         Text("【開發測試：追加維修互動】")
+        if (errorMessage != null) {
+            Text(text = "操作未完成：$errorMessage")
+        }
         Text(
             "共 ${items.size} 個項目\n" +
                     "已同意：$approvedCount 個\n" +
