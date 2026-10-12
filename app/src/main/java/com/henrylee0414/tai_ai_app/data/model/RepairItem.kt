@@ -7,5 +7,6 @@ data class RepairItem(
     val approvalStatus: ApprovalStatus, //審核狀態
     val isAdditional: Boolean, //是否為追加項目
     val inspectionFinding: String,
-    val explanation: RepairExplanation? = null
+    val explanation: RepairExplanation? = null,
+    val quote: RepairQuote? = null
 )

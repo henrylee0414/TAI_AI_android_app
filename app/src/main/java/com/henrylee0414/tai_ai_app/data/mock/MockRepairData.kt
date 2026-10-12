@@ -3,6 +3,7 @@ package com.henrylee0414.tai_ai_app.data.mock
 import com.henrylee0414.tai_ai_app.data.model.ApprovalStatus
 import com.henrylee0414.tai_ai_app.data.model.RepairItem
 import com.henrylee0414.tai_ai_app.data.model.RepairStatus
+import com.henrylee0414.tai_ai_app.data.model.RepairQuote
 
 object MockRepairData {
 
@@ -13,7 +14,11 @@ object MockRepairData {
             status = RepairStatus.IN_PROGRESS,
             approvalStatus = ApprovalStatus.APPROVED,
             isAdditional = false,
-            inspectionFinding = "【模擬資料】檢查紀錄指出前輪煞車片需更換，已列入本次原定施工。"
+            inspectionFinding = "【模擬資料】檢查紀錄指出前輪煞車片需更換，已列入本次原定施工。",
+            quote = RepairQuote(
+                partsAmountTWD = 2400,
+                laborAmountTWD = 600
+            )
         ),
 
         RepairItem(
@@ -22,7 +27,11 @@ object MockRepairData {
             status = RepairStatus.PENDING,
             approvalStatus = ApprovalStatus.AWAITING_APPROVAL,
             isAdditional = true,
-            inspectionFinding = "【模擬資料】電瓶檢測報告建議更換，已提出追加方案，等待顧客確認"
+            inspectionFinding = "【模擬資料】電瓶檢測報告建議更換，已提出追加方案，等待顧客確認",
+            quote = RepairQuote(
+                partsAmountTWD = 3200,
+                laborAmountTWD = 300
+            )
         )
     )
 }

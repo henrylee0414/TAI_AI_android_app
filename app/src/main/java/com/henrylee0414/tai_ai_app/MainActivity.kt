@@ -78,6 +78,34 @@ fun Greeting(
         it.approvalStatus == ApprovalStatus.AWAITING_APPROVAL
     }
 
+    val approvedItems = items.filter { //filter挑出符合條件的項目
+        it.approvalStatus == ApprovalStatus.APPROVED
+    }
+
+    val awaitingItems = items.filter {
+        it.approvalStatus == ApprovalStatus.AWAITING_APPROVAL
+    }
+
+    val deferredItems = items.filter {
+        it.approvalStatus == ApprovalStatus.DEFERRED
+    }
+
+    val approvedAmount = approvedItems.sumOf { //挑出項目的金額加總
+        it.quote?.totalAmountTWD ?: 0L
+    }
+
+    val awaitingAmount = awaitingItems.sumOf {
+        it.quote?.totalAmountTWD ?: 0L
+    }
+
+    val deferredAmount = deferredItems.sumOf {
+        it.quote?.totalAmountTWD ?: 0L
+    }
+
+    val missingQuoteCount = items.count { //沒有報價項目不貢獻金額
+        it.quote == null
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -95,6 +123,20 @@ fun Greeting(
                     "已同意：$approvedCount 個\n" +
                     "待確認：$awaitingCount 個"
         )
+        Text(
+            text = """
+                【模擬費用摘要・TWD】
+                已同意項目已提供報價合計：$approvedAmount 元
+                待確認項目已提供報價合計：$awaitingAmount 元
+                暫緩項目已提供報價合計：$deferredAmount 元
+            """.trimIndent()
+        )
+
+        if (missingQuoteCount > 0) {
+            Text(
+                text = "有 $missingQuoteCount 個項目尚未提供報價，" + "以上僅加總已知金額，並非完整總價。"
+            )
+        }
 
         Button(
             onClick = {
@@ -105,6 +147,19 @@ fun Greeting(
         }
 
         items.forEach { item ->
+            val quote = item.quote
+
+            val quoteText = if (quote == null) {
+                "尚未提供報價"
+            }
+            else {
+                """
+                    【模擬報價】
+                    零件費：${quote.partsAmountTWD}元
+                    工資：${quote.laborAmountTWD}元
+                    合計：${quote.totalAmountTWD}元(${quote.currency})
+                """.trimIndent()
+            }
             Text(
                 text = """
                     項目：${item.name}
@@ -113,6 +168,7 @@ fun Greeting(
                     追加項目：${if (item.isAdditional) "是" else "否"}
                     檢查發現：${item.inspectionFinding}
                     AI 解說：${item.explanation?.reason ?: "尚未產生"}
+                    報價：$quoteText
                 """.trimIndent()
             )
 
